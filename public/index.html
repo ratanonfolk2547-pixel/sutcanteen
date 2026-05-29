@@ -1,551 +1,458 @@
-<body>
+<script>
 
-  <!-- NAVBAR -->
+  let allRestaurants = [];
 
-  <div class="navbar">
+  let currentRestaurants = [];
 
-    SUTCANTEEN 🍜
+  // =========================
+  // โหลดข้อมูล
+  // =========================
 
-  </div>
+  async function loadData(){
 
-  <!-- CATEGORY -->
+    try{
 
-  <div class="container">
+      console.log("Loading data...");
 
-    <div class="section-title">
+      const response =
+        await fetch("/data");
 
-      🍽️ ประเภทอาหาร
+      const result =
+        await response.json();
 
-    </div>
+      console.log(result);
 
-    <div
-      class="category-list"
-      id="categoryList"
-    >
+      const rows =
+        result.data || [];
 
-    </div>
+      const restaurants = {};
 
-  </div>
+      // =========================
+      // LOOP GOOGLE SHEET
+      // =========================
 
-  <!-- CARDS -->
+      rows.forEach(row => {
 
-  <div class="container">
+        /*
+          row[0] = Timestamp
+          row[1] = ชื่อร้าน
+          row[2] = เมนูแนะนำ
+          row[3] = คะแนน
+          row[4] = จุดเด่น
+          row[5] = ประเภทอาหาร
+        */
 
-    <div class="section-title">
+        const name =
+          row[1]?.trim();
 
-      🔥 ร้านอาหารแนะนำ
+        const menu =
+          row[2]?.trim();
 
-    </div>
+        const score =
+          parseFloat(row[3]) || 0;
 
-    <div
-      class="cards"
-      id="cards"
-    >
+        const highlight =
+          row[4] || "ไม่มีข้อมูล";
 
-    </div>
+        const category =
+          row[5] || "ไม่ระบุ";
 
-  </div>
+        if(!name) return;
 
-  <!-- MODAL -->
+        // =========================
+        // IMAGE
+        // =========================
 
-  <div
-    class="modal"
-    id="modal"
-  >
+        let image =
+          "default.jpg";
 
-    <span
-      class="close"
-      onclick="closeModal()"
-    >
+        if(name.includes("ข้าวมันไก่ตระกูลอ๋อง")){
+          image = "13.jpg";
+        }
 
-      ×
+        else if(name.includes("เครื่องดื่ม & กาแฟ & ขนม")){
+          image = "1.jpg";
+        }
 
-    </span>
+        else if(name.includes("ก๋วยเตี๋ยวหมู เย็นตาโฟ")){
+          image = "2.jpg";
+        }
 
-    <div class="modal-content">
+        else if(name.includes("ข้าวราดแกง เบอร์ 3")){
+          image = "3.jpg";
+        }
 
-      <img
-        id="modalImage"
-        class="modal-image"
-      >
+        else if(name.includes("อาหารตามสั่ง เบอร์ 4")){
+          image = "4.jpg";
+        }
 
-      <div class="modal-body">
+        else if(name.includes("ฐ.ข้าวมันไก่")){
+          image = "5.jpg";
+        }
 
-        <div
-          class="modal-title"
-          id="modalTitle"
-        >
-        </div>
+        else if(name.includes("อาหารอีสาน ขนมจีน")){
+          image = "6.jpg";
+        }
 
-        <div
-          class="modal-info"
-          id="modalScore"
-        >
-        </div>
+        else if(name.includes("ข้าวราดแกง (มุสลิม)")){
+          image = "7.jpg";
+        }
 
-        <div
-          class="modal-info"
-          id="modalCategory"
-        >
-        </div>
+        else if(name.includes("ข้าวราดแกง เบอร์ 8")){
+          image = "8.jpg";
+        }
 
-        <div
-          class="modal-info"
-          id="modalHighlight"
-        >
-        </div>
+        else if(name.includes("เจ้น้อง ก๋วยเตี๋ยวเนื้อ / ไก่ตุ๋น")){
+          image = "9.jpg";
+        }
 
-        <div
-          class="modal-info"
-          id="modalPeople"
-        >
-        </div>
+        else if(name.includes("อาหารตามสั่ง เบอร์ 10")){
+          image = "10.jpg";
+        }
 
-        <div class="modal-menu">
+        else if(name.includes("เครื่องดื่ม & ขนมหวาน & ผลไม้")){
+          image = "11.jpg";
+        }
 
-          <div class="modal-menu-title">
+        else if(name.includes("ร้านข้างหน้าร้านน้ำ เบอร์ 11")){
+          image = "12.jpg";
+        }
 
-            🍽️ เมนูแนะนำ
+        // =========================
+        // CREATE SHOP
+        // =========================
 
-          </div>
+        if(!restaurants[name]){
 
-          <div id="modalMenus">
+          restaurants[name] = {
 
-          </div>
+            totalScore:0,
 
-        </div>
+            totalPeople:0,
 
-      </div>
+            highlight:"",
+            category:"",
+            image:"",
 
-    </div>
+            menus:{}
 
-  </div>
+          };
 
-  <!-- SCRIPT -->
+        }
 
-  <script>
+        // =========================
+        // รวมคะแนนร้าน
+        // =========================
 
-    let allRestaurants = [];
+        restaurants[name]
+          .totalScore += score;
 
-    let currentRestaurants = [];
+        restaurants[name]
+          .totalPeople += 1;
 
-    // =========================
-    // LOAD DATA
-    // =========================
+        restaurants[name]
+          .highlight = highlight;
 
-    async function loadData(){
+        restaurants[name]
+          .category = category;
 
-      try{
+        restaurants[name]
+          .image = image;
 
-        console.log("Loading data...");
+        // =========================
+        // รวมคะแนนเมนู
+        // =========================
 
-        const response =
-          await fetch("/data");
+        if(
+          menu &&
+          menu !== "ไม่มีข้อมูล"
+        ){
 
-        const result =
-          await response.json();
+          if(
+            !restaurants[name]
+              .menus[menu]
+          ){
 
-        console.log(result);
-
-        const rows =
-          result.data || [];
-
-        const restaurants = {};
-
-        rows.forEach(row => {
-
-          const name =
-            row[1]?.trim();
-
-          const menu =
-            row[2]?.trim();
-
-          const score =
-            parseFloat(row[3]) || 0;
-
-          const highlight =
-            row[4] || "ไม่มีข้อมูล";
-
-          const category =
-            row[5] || "ไม่ระบุ";
-
-          if(!name) return;
-
-          let image =
-            "default.jpg";
-
-          if(name.includes("ข้าวมันไก่ตระกูลอ๋อง")){
-            image = "13.jpg";
-          }
-
-          // =====================
-          // CREATE SHOP
-          // =====================
-
-          if(!restaurants[name]){
-
-            restaurants[name] = {
+            restaurants[name]
+              .menus[menu] = {
 
               totalScore:0,
-
-              totalPeople:0,
-
-              highlight:"",
-
-              category:"",
-
-              image:"",
-
-              menus:{}
+              people:0
 
             };
 
           }
 
           restaurants[name]
+            .menus[menu]
             .totalScore += score;
 
           restaurants[name]
-            .totalPeople += 1;
+            .menus[menu]
+            .people += 1;
 
-          restaurants[name]
-            .highlight = highlight;
-
-          restaurants[name]
-            .category = category;
-
-          restaurants[name]
-            .image = image;
-
-          // =====================
-          // MENU
-          // =====================
-
-          if(menu){
-
-            if(
-              !restaurants[name]
-                .menus[menu]
-            ){
-
-              restaurants[name]
-                .menus[menu] = {
-
-                totalScore:0,
-
-                people:0
-
-              };
-
-            }
-
-            restaurants[name]
-              .menus[menu]
-              .totalScore += score;
-
-            restaurants[name]
-              .menus[menu]
-              .people += 1;
-
-          }
-
-        });
-
-        // =========================
-        // CONVERT
-        // =========================
-
-        allRestaurants =
-
-          Object.entries(restaurants)
-
-          .map(([name,data]) => {
-
-            const avgScore =
-
-              data.totalPeople > 0
-
-              ? (
-                  data.totalScore
-                  /
-                  data.totalPeople
-                )
-
-              : 0;
-
-            const sortedMenus =
-
-              Object.entries(data.menus)
-
-              .map(([menuName,menuData]) => {
-
-                return {
-
-                  name:menuName,
-
-                  avg:
-                    menuData.totalScore
-                    /
-                    menuData.people,
-
-                  people:
-                    menuData.people
-
-                };
-
-              })
-
-              .sort((a,b) => {
-
-                if(b.avg !== a.avg){
-
-                  return b.avg - a.avg;
-
-                }
-
-                return b.people - a.people;
-
-              });
-
-            return {
-
-              name:name,
-
-              avg:avgScore,
-
-              people:data.totalPeople,
-
-              highlight:data.highlight,
-
-              category:data.category,
-
-              image:data.image,
-
-              menus:sortedMenus
-
-            };
-
-          })
-
-          .sort((a,b) => {
-
-            if(b.avg !== a.avg){
-
-              return b.avg - a.avg;
-
-            }
-
-            return b.people - a.people;
-
-          });
-
-        console.log(allRestaurants);
-
-        createCategoryButtons();
-
-        showRestaurants(allRestaurants);
-
-      }
-
-      catch(error){
-
-        console.error(error);
-
-      }
-
-    }
-
-    // =========================
-    // CATEGORY BUTTONS
-    // =========================
-
-    function createCategoryButtons(){
-
-      const categoryList =
-        document.getElementById(
-          "categoryList"
-        );
-
-      if(!categoryList){
-
-        console.log(
-          "categoryList not found"
-        );
-
-        return;
-
-      }
-
-      const categorySet =
-        new Set();
-
-      allRestaurants.forEach(shop => {
-
-        categorySet.add(
-          shop.category
-        );
+        }
 
       });
 
-      let html = "";
+      // =========================
+      // แปลงข้อมูล
+      // =========================
+
+      allRestaurants =
+
+        Object.entries(restaurants)
+
+        .map(([name,data]) => {
+
+          // คะแนนร้าน
+
+          const avgScore =
+
+            data.totalPeople > 0
+
+            ? (
+                data.totalScore
+                /
+                data.totalPeople
+              )
+
+            : 0;
+
+          // =========================
+          // เรียงเมนู
+          // =========================
+
+          const sortedMenus =
+
+            Object.entries(data.menus)
+
+            .map(([menuName,menuData]) => {
+
+              const menuAvg =
+
+                menuData.totalScore
+                /
+                menuData.people;
+
+              return {
+
+                name:menuName,
+
+                avg:menuAvg,
+
+                people:menuData.people
+
+              };
+
+            })
+
+            .sort((a,b) => {
+
+              // คะแนนก่อน
+
+              if(b.avg !== a.avg){
+
+                return b.avg - a.avg;
+
+              }
+
+              // รีวิวมากกว่า
+
+              if(b.people !== a.people){
+
+                return b.people - a.people;
+
+              }
+
+              // เรียงชื่อ
+
+              return a.name.localeCompare(
+                b.name,
+                "th"
+              );
+
+            });
+
+          return {
+
+            name:name,
+
+            avg:avgScore,
+
+            people:data.totalPeople,
+
+            highlight:data.highlight,
+
+            category:data.category,
+
+            image:data.image,
+
+            menus:sortedMenus
+
+          };
+
+        })
+
+        // =========================
+        // SORT ร้าน
+        // =========================
+
+        .sort((a,b) => {
+
+          if(b.avg !== a.avg){
+
+            return b.avg - a.avg;
+
+          }
+
+          return b.people - a.people;
+
+        });
+
+      console.log(allRestaurants);
+
+      createCategoryButtons();
+
+      showRestaurants(allRestaurants);
+
+    }
+
+    catch(error){
+
+      console.error(error);
+
+    }
+
+  }
+
+  // =========================
+  // CATEGORY BUTTONS
+  // =========================
+
+  function createCategoryButtons(){
+
+    const categoryList =
+
+      document.getElementById(
+        "categoryList"
+      );
+
+    const categorySet =
+      new Set();
+
+    allRestaurants.forEach(shop => {
+
+      const words =
+
+        shop.category
+        .split(/[ ,/&]+/);
+
+      words.forEach(word => {
+
+        if(word.trim()){
+
+          categorySet.add(
+            word.trim()
+          );
+
+        }
+
+      });
+
+    });
+
+    let html = "";
+
+    html += `
+
+      <button
+        class="category-btn"
+        onclick="
+          filterRestaurants('ทั้งหมด')
+        "
+      >
+
+        ทั้งหมด
+
+      </button>
+
+    `;
+
+    categorySet.forEach(category => {
 
       html += `
 
         <button
           class="category-btn"
           onclick="
-            filterRestaurants('ทั้งหมด')
+            filterRestaurants(
+              '${category}'
+            )
           "
         >
 
-          ทั้งหมด
+          ${category}
 
         </button>
 
       `;
 
-      categorySet.forEach(category => {
+    });
 
-        html += `
+    categoryList.innerHTML =
+      html;
 
-          <button
-            class="category-btn"
-            onclick="
-              filterRestaurants(
-                '${category}'
-              )
-            "
-          >
+  }
 
-            ${category}
+  // =========================
+  // FILTER
+  // =========================
 
-          </button>
+  function filterRestaurants(category){
 
-        `;
+    if(category === "ทั้งหมด"){
 
-      });
+      showRestaurants(
+        allRestaurants
+      );
 
-      categoryList.innerHTML =
-        html;
+      return;
 
     }
 
-    // =========================
-    // FILTER
-    // =========================
+    const filtered =
 
-    function filterRestaurants(category){
+      allRestaurants.filter(shop =>
 
-      if(category === "ทั้งหมด"){
+        shop.category.includes(
+          category
+        )
 
-        showRestaurants(
-          allRestaurants
-        );
+      );
 
-        return;
+    showRestaurants(filtered);
 
-      }
+  }
 
-      const filtered =
+  // =========================
+  // SHOW RESTAURANTS
+  // =========================
 
-        allRestaurants.filter(shop =>
+  function showRestaurants(restaurants){
 
-          shop.category.includes(
-            category
-          )
+    currentRestaurants =
+      restaurants;
 
-        );
-
-      showRestaurants(filtered);
-
-    }
-
-    // =========================
-    // SHOW
-    // =========================
-
-    function showRestaurants(restaurants){
-
-      currentRestaurants =
-        restaurants;
-
-      const cards =
-        document.getElementById(
-          "cards"
-        );
-
-      if(!cards) return;
-
-      let html = "";
-
-      restaurants.forEach((shop,index) => {
-
-        html += `
-
-          <div
-            class="card"
-            onclick="
-              openModal(${index})
-            "
-          >
-
-            <img
-              class="card-image"
-              src="images/${shop.image}"
-            >
-
-            <div class="card-content">
-
-              <div class="top-rank">
-
-                TOP ${index + 1}
-
-              </div>
-
-              <div class="restaurant-name">
-
-                ${shop.name}
-
-              </div>
-
-              <div class="score">
-
-                ⭐ ${shop.avg.toFixed(1)}/5
-
-              </div>
-
-            </div>
-
-          </div>
-
-        `;
-
-      });
-
-      cards.innerHTML =
-        html;
-
-    }
-
-    // =========================
-    // OPEN MODAL
-    // =========================
-
-    function openModal(index){
-
-      const shop =
-        currentRestaurants[index];
-
-      if(!shop) return;
+    const cards =
 
       document.getElementById(
-        "modal"
-      ).style.display = "block";
+        "cards"
+      );
 
-      document.getElementById(
-        "modalTitle"
-      ).innerText =
-        shop.name;
+    let html = "";
+
+    restaurants.forEach((shop,index) => {
 
       let menuHTML = "";
 
@@ -553,11 +460,17 @@
 
         menuHTML += `
 
-          <div class="modal-menu-item">
+          <div class="menu-item">
 
-            ${menu.name}
+            🍴 ${menu.name}
 
-            ⭐ ${menu.avg.toFixed(1)}
+            <br><br>
+
+            ⭐ ${menu.avg.toFixed(1)}/5
+
+            <br>
+
+            👥 ${menu.people} รีวิว
 
           </div>
 
@@ -565,35 +478,84 @@
 
       });
 
-      document.getElementById(
-        "modalMenus"
-      ).innerHTML =
-        menuHTML;
+      html += `
 
-    }
+        <div class="card">
 
-    // =========================
-    // CLOSE
-    // =========================
+          <img
+            class="card-image"
+            src="images/${shop.image}"
+          >
 
-    function closeModal(){
+          <div class="card-content">
 
-      document.getElementById(
-        "modal"
-      ).style.display = "none";
+            <div class="top-rank">
 
-    }
+              TOP ${index + 1}
 
-    // =========================
-    // START
-    // =========================
+            </div>
 
-    window.onload = function(){
+            <div class="restaurant-name">
 
-      loadData();
+              ${shop.name}
 
-    };
+            </div>
 
-  </script>
+            <div class="score">
 
-</body>
+              ⭐ ${shop.avg.toFixed(1)}/5
+
+            </div>
+
+            <div class="info">
+
+              🍜 ประเภทอาหาร:
+              ${shop.category}
+
+            </div>
+
+            <div class="info">
+
+              🔥 จุดเด่น:
+              ${shop.highlight}
+
+            </div>
+
+            <div class="info">
+
+              👥 จำนวนผู้รีวิว:
+              ${shop.people} คน
+
+            </div>
+
+            <div class="menu-section">
+
+              <div class="menu-title">
+
+                🍽️ เมนูแนะนำ
+
+              </div>
+
+              ${menuHTML}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      `;
+
+    });
+
+    cards.innerHTML = html;
+
+  }
+
+  // =========================
+  // START
+  // =========================
+
+  loadData();
+
+</script>
