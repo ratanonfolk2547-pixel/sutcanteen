@@ -2,10 +2,8 @@
 
   let allRestaurants = [];
 
-  let currentRestaurants = [];
-
   // =========================
-  // โหลดข้อมูล
+  // LOAD DATA
   // =========================
 
   async function loadData(){
@@ -28,19 +26,10 @@
       const restaurants = {};
 
       // =========================
-      // LOOP GOOGLE SHEET
+      // LOOP DATA
       // =========================
 
       rows.forEach(row => {
-
-        /*
-          row[0] = Timestamp
-          row[1] = ชื่อร้าน
-          row[2] = เมนูแนะนำ
-          row[3] = คะแนน
-          row[4] = จุดเด่น
-          row[5] = ประเภทอาหาร
-        */
 
         const name =
           row[1]?.trim();
@@ -119,7 +108,7 @@
         }
 
         // =========================
-        // CREATE SHOP
+        // CREATE RESTAURANT
         // =========================
 
         if(!restaurants[name]){
@@ -127,7 +116,6 @@
           restaurants[name] = {
 
             totalScore:0,
-
             totalPeople:0,
 
             highlight:"",
@@ -141,7 +129,7 @@
         }
 
         // =========================
-        // รวมคะแนนร้าน
+        // RESTAURANT SCORE
         // =========================
 
         restaurants[name]
@@ -160,13 +148,10 @@
           .image = image;
 
         // =========================
-        // รวมคะแนนเมนู
+        // MENU SCORE
         // =========================
 
-        if(
-          menu &&
-          menu !== "ไม่มีข้อมูล"
-        ){
+        if(menu){
 
           if(
             !restaurants[name]
@@ -196,7 +181,7 @@
       });
 
       // =========================
-      // แปลงข้อมูล
+      // CONVERT DATA
       // =========================
 
       allRestaurants =
@@ -204,8 +189,6 @@
         Object.entries(restaurants)
 
         .map(([name,data]) => {
-
-          // คะแนนร้าน
 
           const avgScore =
 
@@ -220,7 +203,7 @@
             : 0;
 
           // =========================
-          // เรียงเมนู
+          // SORT MENU
           // =========================
 
           const sortedMenus =
@@ -231,9 +214,15 @@
 
               const menuAvg =
 
-                menuData.totalScore
-                /
-                menuData.people;
+                menuData.people > 0
+
+                ? (
+                    menuData.totalScore
+                    /
+                    menuData.people
+                  )
+
+                : 0;
 
               return {
 
@@ -249,23 +238,17 @@
 
             .sort((a,b) => {
 
-              // คะแนนก่อน
-
               if(b.avg !== a.avg){
 
                 return b.avg - a.avg;
 
               }
 
-              // รีวิวมากกว่า
-
               if(b.people !== a.people){
 
                 return b.people - a.people;
 
               }
-
-              // เรียงชื่อ
 
               return a.name.localeCompare(
                 b.name,
@@ -295,7 +278,7 @@
         })
 
         // =========================
-        // SORT ร้าน
+        // SORT RESTAURANT
         // =========================
 
         .sort((a,b) => {
@@ -333,10 +316,11 @@
   function createCategoryButtons(){
 
     const categoryList =
-
       document.getElementById(
         "categoryList"
       );
+
+    if(!categoryList) return;
 
     const categorySet =
       new Set();
@@ -441,20 +425,20 @@
 
   function showRestaurants(restaurants){
 
-    currentRestaurants =
-      restaurants;
-
     const cards =
-
       document.getElementById(
         "cards"
       );
+
+    if(!cards) return;
 
     let html = "";
 
     restaurants.forEach((shop,index) => {
 
       let menuHTML = "";
+
+      // ตรงนี้แก้สำคัญที่สุด
 
       shop.menus.forEach(menu => {
 
