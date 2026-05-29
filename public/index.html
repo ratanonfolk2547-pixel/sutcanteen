@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="th">
 
@@ -169,6 +168,8 @@
 
       transition:0.3s;
 
+      cursor:pointer;
+
       box-shadow:
       0 0 20px rgba(0,0,0,0.4);
 
@@ -250,9 +251,122 @@
 
     }
 
+    .empty{
+
+      color:#999;
+      font-size:22px;
+
+    }
+
+    /* =========================
+       MODAL
+    ========================= */
+
+    .modal{
+
+      display:none;
+
+      position:fixed;
+
+      z-index:9999;
+
+      left:0;
+      top:0;
+
+      width:100%;
+      height:100%;
+
+      background:
+      rgba(0,0,0,0.8);
+
+      overflow:auto;
+
+      padding:40px;
+
+    }
+
+    .modal-content{
+
+      background:#181818;
+
+      max-width:800px;
+
+      margin:auto;
+
+      border-radius:25px;
+
+      overflow:hidden;
+
+      animation:fadeIn 0.3s;
+
+    }
+
+    @keyframes fadeIn{
+
+      from{
+        transform:scale(0.9);
+        opacity:0;
+      }
+
+      to{
+        transform:scale(1);
+        opacity:1;
+      }
+
+    }
+
+    .modal-image{
+
+      width:100%;
+      height:350px;
+
+      object-fit:cover;
+
+    }
+
+    .modal-body{
+
+      padding:30px;
+
+    }
+
+    .modal-title{
+
+      font-size:42px;
+
+      font-weight:bold;
+
+      margin-bottom:20px;
+
+    }
+
+    .modal-score{
+
+      color:gold;
+
+      font-size:30px;
+
+      margin-bottom:20px;
+
+      font-weight:bold;
+
+    }
+
+    .modal-info{
+
+      font-size:18px;
+
+      color:#ddd;
+
+      margin-bottom:16px;
+
+      line-height:1.8;
+
+    }
+
     .menu-section{
 
-      margin-top:20px;
+      margin-top:30px;
 
     }
 
@@ -260,11 +374,11 @@
 
       color:#ffb347;
 
-      font-size:18px;
-
-      margin-bottom:14px;
+      font-size:24px;
 
       font-weight:bold;
+
+      margin-bottom:20px;
 
     }
 
@@ -272,22 +386,30 @@
 
       background:#2b2b2b;
 
-      padding:12px 14px;
+      padding:16px;
 
-      border-radius:10px;
+      border-radius:14px;
 
-      margin-bottom:12px;
+      margin-bottom:14px;
 
-      line-height:1.7;
+      line-height:1.8;
 
-      font-size:15px;
+      font-size:16px;
 
     }
 
-    .empty{
+    .close{
 
-      color:#999;
-      font-size:22px;
+      position:absolute;
+
+      top:20px;
+      right:30px;
+
+      color:white;
+
+      font-size:50px;
+
+      cursor:pointer;
 
     }
 
@@ -333,8 +455,6 @@
 
   <div class="container">
 
-    <!-- CATEGORY -->
-
     <div class="section-title">
 
       🍽️ เลือกประเภทอาหาร
@@ -345,8 +465,6 @@
       class="category-list"
       id="categoryList"
     ></div>
-
-    <!-- RESTAURANT -->
 
     <div class="section-title">
 
@@ -361,11 +479,81 @@
 
   </div>
 
+  <!-- MODAL -->
+
+  <div
+    class="modal"
+    id="modal"
+  >
+
+    <span
+      class="close"
+      onclick="closeModal()"
+    >
+
+      &times;
+
+    </span>
+
+    <div class="modal-content">
+
+      <img
+        id="modalImage"
+        class="modal-image"
+      >
+
+      <div class="modal-body">
+
+        <div
+          class="modal-title"
+          id="modalTitle"
+        ></div>
+
+        <div
+          class="modal-score"
+          id="modalScore"
+        ></div>
+
+        <div
+          class="modal-info"
+          id="modalCategory"
+        ></div>
+
+        <div
+          class="modal-info"
+          id="modalHighlight"
+        ></div>
+
+        <div
+          class="modal-info"
+          id="modalPeople"
+        ></div>
+
+        <div class="menu-section">
+
+          <div class="menu-title">
+
+            🍽️ เมนูแนะนำ
+
+          </div>
+
+          <div id="modalMenus"></div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
   <!-- SCRIPT -->
 
   <script>
 
     let allRestaurants = [];
+
+    let currentRestaurants = [];
 
     // =========================
     // LOAD DATA
@@ -383,16 +571,10 @@
         const result =
           await response.json();
 
-        console.log(result);
-
         const rows =
           result.data || [];
 
         const restaurants = {};
-
-        // =========================
-        // LOOP DATA
-        // =========================
 
         rows.forEach(row => {
 
@@ -567,10 +749,6 @@
 
               : 0;
 
-            // =========================
-            // SORT MENU
-            // =========================
-
             const sortedMenus =
 
               Object.entries(data.menus)
@@ -609,16 +787,7 @@
 
                 }
 
-                if(b.people !== a.people){
-
-                  return b.people - a.people;
-
-                }
-
-                return a.name.localeCompare(
-                  b.name,
-                  "th"
-                );
+                return b.people - a.people;
 
               });
 
@@ -642,10 +811,6 @@
 
           })
 
-          // =========================
-          // SORT RESTAURANT
-          // =========================
-
           .sort((a,b) => {
 
             if(b.avg !== a.avg){
@@ -657,8 +822,6 @@
             return b.people - a.people;
 
           });
-
-        console.log(allRestaurants);
 
         createCategoryButtons();
 
@@ -685,16 +848,6 @@
           "categoryList"
         );
 
-      if(!categoryList){
-
-        console.log(
-          "categoryList not found"
-        );
-
-        return;
-
-      }
-
       const categorySet =
         new Set();
 
@@ -719,9 +872,7 @@
 
       });
 
-      let html = "";
-
-      html += `
+      let html = `
 
         <button
           class="category-btn"
@@ -799,68 +950,24 @@
 
     function showRestaurants(restaurants){
 
+      currentRestaurants =
+        restaurants;
+
       const cards =
         document.getElementById(
           "cards"
         );
 
-      if(!cards){
-
-        console.log(
-          "cards not found"
-        );
-
-        return;
-
-      }
-
       let html = "";
-
-      if(restaurants.length === 0){
-
-        cards.innerHTML = `
-
-          <div class="empty">
-
-            ไม่พบร้านอาหาร
-
-          </div>
-
-        `;
-
-        return;
-
-      }
 
       restaurants.forEach((shop,index) => {
 
-        let menuHTML = "";
-
-        shop.menus.forEach(menu => {
-
-          menuHTML += `
-
-            <div class="menu-item">
-
-              🍴 ${menu.name}
-
-              <br><br>
-
-              ⭐ ${menu.avg.toFixed(1)}/5
-
-              <br>
-
-              👥 ${menu.people} รีวิว
-
-            </div>
-
-          `;
-
-        });
-
         html += `
 
-          <div class="card">
+          <div
+            class="card"
+            onclick="openModal(${index})"
+          >
 
             <img
               class="card-image"
@@ -908,18 +1015,6 @@
 
               </div>
 
-              <div class="menu-section">
-
-                <div class="menu-title">
-
-                  🍽️ เมนูแนะนำ
-
-                </div>
-
-                ${menuHTML}
-
-              </div>
-
             </div>
 
           </div>
@@ -929,6 +1024,117 @@
       });
 
       cards.innerHTML = html;
+
+    }
+
+    // =========================
+    // OPEN MODAL
+    // =========================
+
+    function openModal(index){
+
+      const shop =
+        currentRestaurants[index];
+
+      document.getElementById(
+        "modal"
+      ).style.display = "block";
+
+      document.getElementById(
+        "modalImage"
+      ).src =
+        `images/${shop.image}`;
+
+      document.getElementById(
+        "modalTitle"
+      ).innerText =
+        shop.name;
+
+      document.getElementById(
+        "modalScore"
+      ).innerText =
+        `⭐ ${shop.avg.toFixed(1)}/5`;
+
+      document.getElementById(
+        "modalCategory"
+      ).innerText =
+        `🍜 ประเภทอาหาร: ${shop.category}`;
+
+      document.getElementById(
+        "modalHighlight"
+      ).innerText =
+        `🔥 จุดเด่น: ${shop.highlight}`;
+
+      document.getElementById(
+        "modalPeople"
+      ).innerText =
+        `👥 จำนวนผู้รีวิว: ${shop.people} คน`;
+
+      let menuHTML = "";
+
+      shop.menus.forEach((menu,index) => {
+
+        menuHTML += `
+
+          <div class="menu-item">
+
+            <b>
+
+              #${index + 1}
+              ${menu.name}
+
+            </b>
+
+            <br><br>
+
+            ⭐ ${menu.avg.toFixed(1)}/5
+
+            <br>
+
+            👥 ${menu.people} รีวิว
+
+          </div>
+
+        `;
+
+      });
+
+      document.getElementById(
+        "modalMenus"
+      ).innerHTML =
+        menuHTML;
+
+    }
+
+    // =========================
+    // CLOSE MODAL
+    // =========================
+
+    function closeModal(){
+
+      document.getElementById(
+        "modal"
+      ).style.display = "none";
+
+    }
+
+    // =========================
+    // CLICK OUTSIDE
+    // =========================
+
+    window.onclick = function(event){
+
+      const modal =
+        document.getElementById(
+          "modal"
+        );
+
+      if(event.target == modal){
+
+        modal.style.display =
+          "none";
+
+      }
 
     }
 
@@ -952,4 +1158,3 @@
 
 </body>
 </html>
-```
