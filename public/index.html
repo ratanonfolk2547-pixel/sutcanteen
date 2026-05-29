@@ -1,3 +1,4 @@
+```html
 <script>
 
   let allRestaurants = [];
@@ -26,6 +27,10 @@
         result.data || [];
 
       const restaurants = {};
+
+      // =========================
+      // LOOP ข้อมูลจาก Google Sheet
+      // =========================
 
       rows.forEach(row => {
 
@@ -166,6 +171,8 @@
           menu !== "ไม่มีข้อมูล"
         ){
 
+          // ถ้ายังไม่มีเมนูนี้
+
           if(
             !restaurants[name]
               .menus[menu]
@@ -182,9 +189,13 @@
 
           }
 
+          // รวมคะแนนเมนู
+
           restaurants[name]
             .menus[menu]
             .totalScore += score;
+
+          // จำนวนคนรีวิวเมนู
 
           restaurants[name]
             .menus[menu]
@@ -195,7 +206,7 @@
       });
 
       // =========================
-      // แปลงข้อมูล
+      // แปลงข้อมูลร้าน
       // =========================
 
       allRestaurants =
@@ -203,6 +214,10 @@
         Object.entries(restaurants)
 
         .map(([name,data]) => {
+
+          // =========================
+          // คะแนนเฉลี่ยร้าน
+          // =========================
 
           const avgScore =
 
@@ -226,6 +241,8 @@
 
             .map(([menuName,menuData]) => {
 
+              // คะแนนเฉลี่ยเมนู
+
               const menuAvg =
 
                 menuData.totalScore
@@ -244,11 +261,41 @@
 
             })
 
-            .sort((a,b) =>
+            // =========================
+            // SORT MENU
+            // =========================
 
-              b.avg - a.avg
+            .sort((a,b) => {
 
-            );
+              // 1. เรียงคะแนนก่อน
+
+              if(b.avg !== a.avg){
+
+                return b.avg - a.avg;
+
+              }
+
+              // 2. ถ้าคะแนนเท่ากัน
+              // ดูจำนวนรีวิว
+
+              if(b.people !== a.people){
+
+                return b.people - a.people;
+
+              }
+
+              // 3. ถ้ายังเท่ากันอีก
+              // เรียงชื่อภาษาไทย
+
+              return a.name.localeCompare(
+
+                b.name,
+
+                "th"
+
+              );
+
+            });
 
           return {
 
@@ -274,11 +321,22 @@
         // เรียงร้านตามคะแนน
         // =========================
 
-        .sort((a,b) =>
+        .sort((a,b) => {
 
-          b.avg - a.avg
+          // เรียงคะแนนก่อน
 
-        );
+          if(b.avg !== a.avg){
+
+            return b.avg - a.avg;
+
+          }
+
+          // ถ้าคะแนนเท่ากัน
+          // ดูจำนวนรีวิว
+
+          return b.people - a.people;
+
+        });
 
       console.log(allRestaurants);
 
@@ -297,7 +355,7 @@
   }
 
   // =========================
-  // ปุ่มประเภทอาหาร
+  // สร้างปุ่มประเภทอาหาร
   // =========================
 
   function createCategoryButtons(){
@@ -378,7 +436,7 @@
   }
 
   // =========================
-  // Filter
+  // FILTER ร้านอาหาร
   // =========================
 
   function filterRestaurants(category){
@@ -610,7 +668,7 @@
   }
 
   // =========================
-  // กดพื้นหลังปิด
+  // กดพื้นหลังปิด Popup
   // =========================
 
   window.onclick = function(event){
@@ -631,9 +689,10 @@
   }
 
   // =========================
-  // เริ่มโหลด
+  // เริ่มโหลดข้อมูล
   // =========================
 
   loadData();
 
 </script>
+```
