@@ -1,284 +1,301 @@
+```html
 <script>
 
   let allRestaurants = [];
 
+  // =========================
+  // โหลดข้อมูลจาก Server
+  // =========================
+
   async function loadData(){
 
-    const response =
-      await fetch("/data");
+    try{
 
-    const result =
-      await response.json();
+      const response =
+        await fetch("/data");
 
-    const rows =
-      result.data;
+      const result =
+        await response.json();
 
-    const restaurants = {};
+      const rows =
+        result.data || [];
 
-    rows.forEach(row => {
+      const restaurants = {};
 
-      /*
-        row[0] = Timestamp
-        row[1] = ชื่อร้าน
-        row[2] = เมนูแนะนำ
-        row[3] = คะแนน
-        row[4] = จุดเด่น
-        row[5] = ประเภทอาหาร
-      */
+      rows.forEach(row => {
 
-      const name =
-        row[1]?.trim();
+        /*
+          row[0] = Timestamp
+          row[1] = ชื่อร้าน
+          row[2] = เมนูแนะนำ
+          row[3] = คะแนน
+          row[4] = จุดเด่น
+          row[5] = ประเภทอาหาร
+        */
 
-      const menu =
-        row[2]?.trim();
+        const name =
+          row[1]?.trim();
 
-      const score =
-        parseFloat(row[3]) || 0;
+        const menu =
+          row[2]?.trim();
 
-      const highlight =
-        row[4] || "ไม่มีข้อมูล";
+        const score =
+          parseFloat(row[3]) || 0;
 
-      const category =
-        row[5] || "ไม่ระบุ";
+        const highlight =
+          row[4] || "ไม่มีข้อมูล";
 
-      if(!name) return;
+        const category =
+          row[5] || "ไม่ระบุ";
 
-      // ======================
-      // รูปภาพร้านอาหาร
-      // ======================
+        if(!name) return;
 
-      let image =
-        "default.jpg";
+        // =========================
+        // รูปภาพร้าน
+        // =========================
 
-      if(name.includes("ข้าวมันไก่ตระกูลอ๋อง")){
-        image = "13.jpg";
-      }
+        let image =
+          "default.jpg";
 
-      else if(name.includes("เครื่องดื่ม & กาแฟ & ขนม")){
-        image = "1.jpg";
-      }
+        if(name.includes("ข้าวมันไก่ตระกูลอ๋อง")){
+          image = "13.jpg";
+        }
 
-      else if(name.includes("ก๋วยเตี๋ยวหมู เย็นตาโฟ")){
-        image = "2.jpg";
-      }
+        else if(name.includes("เครื่องดื่ม & กาแฟ & ขนม")){
+          image = "1.jpg";
+        }
 
-      else if(name.includes("ข้าวราดแกง เบอร์ 3")){
-        image = "3.jpg";
-      }
+        else if(name.includes("ก๋วยเตี๋ยวหมู เย็นตาโฟ")){
+          image = "2.jpg";
+        }
 
-      else if(name.includes("อาหารตามสั่ง เบอร์ 4")){
-        image = "4.jpg";
-      }
+        else if(name.includes("ข้าวราดแกง เบอร์ 3")){
+          image = "3.jpg";
+        }
 
-      else if(name.includes("ฐ.ข้าวมันไก่")){
-        image = "5.jpg";
-      }
+        else if(name.includes("อาหารตามสั่ง เบอร์ 4")){
+          image = "4.jpg";
+        }
 
-      else if(name.includes("อาหารอีสาน ขนมจีน")){
-        image = "6.jpg";
-      }
+        else if(name.includes("ฐ.ข้าวมันไก่")){
+          image = "5.jpg";
+        }
 
-      else if(name.includes("ข้าวราดแกง (มุสลิม)")){
-        image = "7.jpg";
-      }
+        else if(name.includes("อาหารอีสาน ขนมจีน")){
+          image = "6.jpg";
+        }
 
-      else if(name.includes("ข้าวราดแกง เบอร์ 8")){
-        image = "8.jpg";
-      }
+        else if(name.includes("ข้าวราดแกง (มุสลิม)")){
+          image = "7.jpg";
+        }
 
-      else if(name.includes("เจ้น้อง ก๋วยเตี๋ยวเนื้อ / ไก่ตุ๋น")){
-        image = "9.jpg";
-      }
+        else if(name.includes("ข้าวราดแกง เบอร์ 8")){
+          image = "8.jpg";
+        }
 
-      else if(name.includes("อาหารตามสั่ง เบอร์ 10")){
-        image = "10.jpg";
-      }
+        else if(name.includes("เจ้น้อง ก๋วยเตี๋ยวเนื้อ / ไก่ตุ๋น")){
+          image = "9.jpg";
+        }
 
-      else if(name.includes("เครื่องดื่ม & ขนมหวาน & ผลไม้")){
-        image = "11.jpg";
-      }
+        else if(name.includes("อาหารตามสั่ง เบอร์ 10")){
+          image = "10.jpg";
+        }
 
-      else if(name.includes("ร้านข้างหน้าร้านน้ำ เบอร์ 11")){
-        image = "12.jpg";
-      }
+        else if(name.includes("เครื่องดื่ม & ขนมหวาน & ผลไม้")){
+          image = "11.jpg";
+        }
 
-      // ======================
-      // สร้าง Object ร้าน
-      // ======================
+        else if(name.includes("ร้านข้างหน้าร้านน้ำ เบอร์ 11")){
+          image = "12.jpg";
+        }
 
-      if(!restaurants[name]){
+        // =========================
+        // สร้าง Object ร้าน
+        // =========================
 
-        restaurants[name] = {
+        if(!restaurants[name]){
 
-          totalScore:0,
-
-          totalPeople:0,
-
-          highlight:"",
-
-          category:"",
-
-          image:"",
-
-          menus:{}
-
-        };
-
-      }
-
-      // ======================
-      // รวมคะแนนร้าน
-      // ======================
-
-      restaurants[name]
-        .totalScore += score;
-
-      restaurants[name]
-        .totalPeople += 1;
-
-      restaurants[name]
-        .highlight = highlight;
-
-      restaurants[name]
-        .category = category;
-
-      restaurants[name]
-        .image = image;
-
-      // ======================
-      // รวมคะแนนเมนู
-      // ======================
-
-      if(
-        menu &&
-        menu !== "ไม่มีข้อมูล"
-      ){
-
-        if(
-          !restaurants[name]
-            .menus[menu]
-        ){
-
-          restaurants[name]
-            .menus[menu] = {
+          restaurants[name] = {
 
             totalScore:0,
 
-            people:0
+            totalPeople:0,
+
+            highlight:"",
+
+            category:"",
+
+            image:"",
+
+            menus:{}
 
           };
 
         }
 
+        // =========================
+        // รวมคะแนนร้าน
+        // =========================
+
         restaurants[name]
-          .menus[menu]
           .totalScore += score;
 
         restaurants[name]
-          .menus[menu]
-          .people += 1;
+          .totalPeople += 1;
 
-      }
+        restaurants[name]
+          .highlight = highlight;
 
-    });
+        restaurants[name]
+          .category = category;
 
-    // ======================
-    // แปลงข้อมูลร้าน
-    // ======================
+        restaurants[name]
+          .image = image;
 
-    allRestaurants =
+        // =========================
+        // รวมคะแนนเมนู
+        // =========================
 
-      Object.entries(restaurants)
+        if(
+          menu &&
+          menu !== "ไม่มีข้อมูล"
+        ){
 
-      .map(([name,data]) => {
+          if(
+            !restaurants[name]
+              .menus[menu]
+          ){
 
-        const avgScore =
+            restaurants[name]
+              .menus[menu] = {
 
-          data.totalPeople > 0
+              totalScore:0,
 
-          ? (
-              data.totalScore
-              /
-              data.totalPeople
-            ).toFixed(1)
-
-          : "0.0";
-
-        // ======================
-        // เรียงเมนูตามคะแนน
-        // ======================
-
-        const sortedMenus =
-
-          Object.entries(data.menus)
-
-          .map(([menuName,menuData]) => {
-
-            const menuAvg =
-
-              (
-                menuData.totalScore
-                /
-                menuData.people
-              ).toFixed(1);
-
-            return {
-
-              name:menuName,
-
-              avg:menuAvg,
-
-              people:menuData.people
+              people:0
 
             };
 
-          })
+          }
 
-          .sort((a,b) =>
+          restaurants[name]
+            .menus[menu]
+            .totalScore += score;
 
-            b.avg - a.avg
+          restaurants[name]
+            .menus[menu]
+            .people += 1;
 
-          );
+        }
 
-        return {
+      });
 
-          name:name,
+      // =========================
+      // แปลงข้อมูลร้าน
+      // =========================
 
-          avg:avgScore,
+      allRestaurants =
 
-          people:data.totalPeople,
+        Object.entries(restaurants)
 
-          highlight:data.highlight,
+        .map(([name,data]) => {
 
-          category:data.category,
+          const avgScore =
 
-          image:data.image,
+            data.totalPeople > 0
 
-          menus:sortedMenus
+            ? (
+                data.totalScore
+                /
+                data.totalPeople
+              )
 
-        };
+            : 0;
 
-      })
+          // =========================
+          // แปลงเมนู + เรียงคะแนน
+          // =========================
 
-      // ======================
-      // เรียงร้านตามคะแนน
-      // ======================
+          const sortedMenus =
 
-      .sort((a,b) =>
+            Object.entries(data.menus)
 
-        b.avg - a.avg
+            .map(([menuName,menuData]) => {
 
-      );
+              const menuAvg =
 
-    createCategoryButtons();
+                menuData.totalScore
+                /
+                menuData.people;
 
-    showRestaurants(allRestaurants);
+              return {
+
+                name:menuName,
+
+                avg:menuAvg,
+
+                people:menuData.people
+
+              };
+
+            })
+
+            // =========================
+            // เรียงคะแนนเมนู
+            // =========================
+
+            .sort((a,b) =>
+
+              b.avg - a.avg
+
+            );
+
+          return {
+
+            name:name,
+
+            avg:avgScore,
+
+            people:data.totalPeople,
+
+            highlight:data.highlight,
+
+            category:data.category,
+
+            image:data.image,
+
+            menus:sortedMenus
+
+          };
+
+        })
+
+        // =========================
+        // เรียงคะแนนร้าน
+        // =========================
+
+        .sort((a,b) =>
+
+          b.avg - a.avg
+
+        );
+
+      createCategoryButtons();
+
+      showRestaurants(allRestaurants);
+
+    }
+
+    catch(error){
+
+      console.log(error);
+
+    }
 
   }
 
-  // ======================
+  // =========================
   // สร้างปุ่มประเภทอาหาร
-  // ======================
+  // =========================
 
   function createCategoryButtons(){
 
@@ -357,9 +374,9 @@
 
   }
 
-  // ======================
+  // =========================
   // Filter ร้านอาหาร
-  // ======================
+  // =========================
 
   function filterRestaurants(category){
 
@@ -386,9 +403,9 @@
 
   }
 
-  // ======================
+  // =========================
   // แสดงร้านอาหาร
-  // ======================
+  // =========================
 
   function showRestaurants(restaurants){
 
@@ -454,7 +471,7 @@
 
             <div class="score">
 
-              ⭐ ${shop.avg}/5
+              ⭐ ${shop.avg.toFixed(1)}/5
 
             </div>
 
@@ -491,9 +508,9 @@
 
   }
 
-  // ======================
+  // =========================
   // เปิด Popup
-  // ======================
+  // =========================
 
   function openModal(shop){
 
@@ -514,7 +531,7 @@
     document.getElementById(
       "modalScore"
     ).innerText =
-      `⭐ คะแนน ${shop.avg}/5`;
+      `⭐ คะแนน ${shop.avg.toFixed(1)}/5`;
 
     document.getElementById(
       "modalCategory"
@@ -533,9 +550,9 @@
 
     let menuHTML = "";
 
-    // ======================
-    // แสดงเมนูเรียงตามคะแนน
-    // ======================
+    // =========================
+    // เรียงเมนูตามคะแนน
+    // =========================
 
     shop.menus.forEach((menu,index) => {
 
@@ -543,13 +560,17 @@
 
         <div class="modal-menu-item">
 
-          #${index + 1}
-          🍴 ${menu.name}
+          <b>
+
+            #${index + 1}
+            ${menu.name}
+
+          </b>
 
           <br><br>
 
           ⭐ คะแนน:
-          ${menu.avg}/5
+          ${menu.avg.toFixed(1)}/5
 
           <br>
 
@@ -569,9 +590,9 @@
 
   }
 
-  // ======================
+  // =========================
   // ปิด Popup
-  // ======================
+  // =========================
 
   function closeModal(){
 
@@ -581,9 +602,9 @@
 
   }
 
-  // ======================
+  // =========================
   // กดพื้นหลังปิด Popup
-  // ======================
+  // =========================
 
   window.onclick = function(event){
 
@@ -602,6 +623,11 @@
 
   }
 
+  // =========================
+  // เริ่มโหลดข้อมูล
+  // =========================
+
   loadData();
 
 </script>
+```
