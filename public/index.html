@@ -1,536 +1,18 @@
-<!DOCTYPE html>
-<html lang="th">
+<script>
 
-<head>
+  let allRestaurants = [];
 
-  <meta charset="UTF-8">
+  let currentRestaurants = [];
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  // =========================
+  // โหลดข้อมูล
+  // =========================
 
-  <title>
-    SUTCANTEEN
-  </title>
+  async function loadData(){
 
-  <style>
+    try{
 
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-    }
-
-    body{
-      background:#000;
-      color:white;
-      font-family:Arial;
-    }
-
-    .navbar{
-
-      background:#000;
-      padding:20px 40px;
-      font-size:34px;
-      font-weight:bold;
-      color:#ff5e00;
-
-      position:sticky;
-      top:0;
-      z-index:1000;
-
-      box-shadow:
-      0 2px 10px rgba(0,0,0,0.5);
-
-    }
-
-    .banner{
-
-      height:350px;
-
-      background:
-
-      linear-gradient(
-        to right,
-        rgba(0,0,0,0.9),
-        rgba(255,94,0,0.5)
-      ),
-
-      url("images/banner.jpg");
-
-      background-size:cover;
-      background-position:center;
-
-      display:flex;
-      align-items:center;
-
-      padding:60px;
-
-    }
-
-    .banner-text{
-
-      max-width:700px;
-
-    }
-
-    .banner-text h1{
-
-      font-size:60px;
-      margin-bottom:20px;
-
-    }
-
-    .banner-text p{
-
-      color:#ddd;
-      font-size:20px;
-      line-height:1.8;
-
-    }
-
-    .container{
-
-      padding:40px;
-
-    }
-
-    .section-title{
-
-      font-size:34px;
-      margin-bottom:30px;
-      font-weight:bold;
-
-    }
-
-    .category-list{
-
-      display:flex;
-      flex-wrap:wrap;
-
-      gap:15px;
-
-      margin-bottom:50px;
-
-    }
-
-    .category-btn{
-
-      background:#222;
-      color:white;
-
-      border:none;
-
-      padding:14px 22px;
-
-      border-radius:12px;
-
-      cursor:pointer;
-
-      transition:0.3s;
-
-      font-size:16px;
-
-    }
-
-    .category-btn:hover{
-
-      background:#ff5e00;
-      transform:scale(1.05);
-
-    }
-
-    .cards{
-
-      display:flex;
-      flex-wrap:wrap;
-      gap:25px;
-
-    }
-
-    .card{
-
-      width:330px;
-
-      background:#181818;
-
-      border-radius:20px;
-
-      overflow:hidden;
-
-      transition:0.3s;
-
-      cursor:pointer;
-
-      box-shadow:
-      0 0 20px rgba(0,0,0,0.4);
-
-    }
-
-    .card:hover{
-
-      transform:scale(1.04);
-
-      background:#252525;
-
-    }
-
-    .card-image{
-
-      width:100%;
-      height:230px;
-
-      object-fit:cover;
-
-    }
-
-    .card-content{
-
-      padding:22px;
-
-    }
-
-    .top-rank{
-
-      display:inline-block;
-
-      background:#ff5e00;
-
-      padding:6px 14px;
-
-      border-radius:8px;
-
-      font-size:14px;
-
-      font-weight:bold;
-
-      margin-bottom:20px;
-
-    }
-
-    .restaurant-name{
-
-      font-size:30px;
-
-      font-weight:bold;
-
-      margin-bottom:20px;
-
-      line-height:1.4;
-
-    }
-
-    .score{
-
-      color:gold;
-
-      font-size:28px;
-
-      font-weight:bold;
-
-      margin-bottom:18px;
-
-    }
-
-    .info{
-
-      color:#ddd;
-
-      margin-bottom:14px;
-
-      line-height:1.7;
-
-      font-size:17px;
-
-    }
-
-    .empty{
-
-      color:#999;
-
-      font-size:22px;
-
-      margin-top:20px;
-
-    }
-
-    /* =========================
-            POPUP
-    ========================= */
-
-    .modal{
-
-      display:none;
-
-      position:fixed;
-
-      z-index:9999;
-
-      left:0;
-      top:0;
-
-      width:100%;
-      height:100%;
-
-      background:
-      rgba(0,0,0,0.9);
-
-      overflow:auto;
-
-    }
-
-    .modal-content{
-
-      background:#1b1b1b;
-
-      width:90%;
-      max-width:800px;
-
-      margin:50px auto;
-
-      border-radius:20px;
-
-      overflow:hidden;
-
-      animation:showModal 0.3s;
-
-    }
-
-    @keyframes showModal{
-
-      from{
-
-        transform:scale(0.8);
-        opacity:0;
-
-      }
-
-      to{
-
-        transform:scale(1);
-        opacity:1;
-
-      }
-
-    }
-
-    .modal-image{
-
-      width:100%;
-      height:350px;
-
-      object-fit:cover;
-
-    }
-
-    .modal-body{
-
-      padding:30px;
-
-    }
-
-    .modal-title{
-
-      font-size:40px;
-
-      font-weight:bold;
-
-      margin-bottom:20px;
-
-    }
-
-    .modal-info{
-
-      font-size:22px;
-
-      color:#ddd;
-
-      margin-bottom:18px;
-
-      line-height:1.8;
-
-    }
-
-    .modal-menu{
-
-      margin-top:25px;
-
-    }
-
-    .modal-menu-title{
-
-      font-size:26px;
-
-      color:#ffb347;
-
-      margin-bottom:18px;
-
-      font-weight:bold;
-
-    }
-
-    .modal-menu-item{
-
-      background:#2b2b2b;
-
-      padding:14px 18px;
-
-      border-radius:12px;
-
-      margin-bottom:12px;
-
-      font-size:18px;
-
-    }
-
-    .close{
-
-      position:absolute;
-
-      top:20px;
-      right:40px;
-
-      font-size:50px;
-
-      color:white;
-
-      cursor:pointer;
-
-    }
-
-  </style>
-
-</head>
-
-<body>
-
-  <div class="navbar">
-    SUTCANTEEN 🍜
-  </div>
-
-  <div class="banner">
-
-    <div class="banner-text">
-
-      <h1>
-        ระบบแนะนำร้านอาหาร
-      </h1>
-
-      <p>
-        วิเคราะห์ข้อมูลจาก Google Forms
-        พร้อมแนะนำร้านอาหารยอดนิยม
-        และเมนูแนะนำจากผู้ใช้งานจริง
-      </p>
-
-    </div>
-
-  </div>
-
-  <div class="container">
-
-    <div class="section-title">
-      🍽️ เลือกประเภทอาหาร
-    </div>
-
-    <div
-      class="category-list"
-      id="categoryList"
-    >
-    </div>
-
-    <div class="section-title">
-      🔥 ร้านอาหารแนะนำ
-    </div>
-
-    <div
-      class="cards"
-      id="cards"
-    >
-    </div>
-
-  </div>
-
-  <!-- ======================
-          POPUP
-  ======================= -->
-
-  <div
-    class="modal"
-    id="modal"
-  >
-
-    <span
-      class="close"
-      onclick="closeModal()"
-    >
-      ×
-    </span>
-
-    <div class="modal-content">
-
-      <img
-        id="modalImage"
-        class="modal-image"
-      >
-
-      <div class="modal-body">
-
-        <div
-          class="modal-title"
-          id="modalTitle"
-        >
-        </div>
-
-        <div
-          class="modal-info"
-          id="modalScore"
-        >
-        </div>
-
-        <div
-          class="modal-info"
-          id="modalCategory"
-        >
-        </div>
-
-        <div
-          class="modal-info"
-          id="modalHighlight"
-        >
-        </div>
-
-        <div
-          class="modal-info"
-          id="modalPeople"
-        >
-        </div>
-
-        <div class="modal-menu">
-
-          <div class="modal-menu-title">
-
-            🍽️ เมนูแนะนำ
-
-          </div>
-
-          <div id="modalMenus">
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  <script>
-
-    let allRestaurants = [];
-
-    async function loadData(){
+      console.log("Loading...");
 
       const response =
         await fetch("/data");
@@ -538,8 +20,10 @@
       const result =
         await response.json();
 
+      console.log(result);
+
       const rows =
-        result.data;
+        result.data || [];
 
       const restaurants = {};
 
@@ -558,7 +42,7 @@
           row[1]?.trim();
 
         const menu =
-          row[2] || "ไม่มีข้อมูล";
+          row[2]?.trim();
 
         const score =
           parseFloat(row[3]) || 0;
@@ -571,9 +55,9 @@
 
         if(!name) return;
 
-        // ======================
-        // รูปภาพร้านอาหาร
-        // ======================
+        // =========================
+        // รูปภาพร้าน
+        // =========================
 
         let image =
           "default.jpg";
@@ -630,6 +114,10 @@
           image = "12.jpg";
         }
 
+        // =========================
+        // สร้าง Object ร้าน
+        // =========================
+
         if(!restaurants[name]){
 
           restaurants[name] = {
@@ -644,58 +132,71 @@
 
             image:"",
 
-            menus:[]
+            menus:{}
 
           };
 
         }
 
-        // รวมคะแนน
+        // =========================
+        // รวมคะแนนร้าน
+        // =========================
 
         restaurants[name]
           .totalScore += score;
 
-        // จำนวนผู้รีวิว
-
         restaurants[name]
           .totalPeople += 1;
-
-        // จุดเด่น
 
         restaurants[name]
           .highlight = highlight;
 
-        // ประเภทอาหาร
-
         restaurants[name]
           .category = category;
-
-        // รูปภาพ
 
         restaurants[name]
           .image = image;
 
-        // เมนูแนะนำ
+        // =========================
+        // รวมคะแนนเมนู
+        // =========================
 
         if(
-
           menu &&
-          menu !== "ไม่มีข้อมูล" &&
-          !restaurants[name]
-            .menus.includes(menu)
-
+          menu !== "ไม่มีข้อมูล"
         ){
 
+          if(
+            !restaurants[name]
+              .menus[menu]
+          ){
+
+            restaurants[name]
+              .menus[menu] = {
+
+              totalScore:0,
+
+              people:0
+
+            };
+
+          }
+
           restaurants[name]
-            .menus.push(menu);
+            .menus[menu]
+            .totalScore += score;
+
+          restaurants[name]
+            .menus[menu]
+            .people += 1;
 
         }
 
       });
 
-      // ======================
+      // =========================
       // แปลงข้อมูล
-      // ======================
+      // =========================
 
       allRestaurants =
 
@@ -711,9 +212,43 @@
                 data.totalScore
                 /
                 data.totalPeople
-              ).toFixed(1)
+              )
 
-            : "0.0";
+            : 0;
+
+          // =========================
+          // เรียงเมนูตามคะแนน
+          // =========================
+
+          const sortedMenus =
+
+            Object.entries(data.menus)
+
+            .map(([menuName,menuData]) => {
+
+              const menuAvg =
+
+                menuData.totalScore
+                /
+                menuData.people;
+
+              return {
+
+                name:menuName,
+
+                avg:menuAvg,
+
+                people:menuData.people
+
+              };
+
+            })
+
+            .sort((a,b) =>
+
+              b.avg - a.avg
+
+            );
 
           return {
 
@@ -729,13 +264,15 @@
 
             image:data.image,
 
-            menus:data.menus
+            menus:sortedMenus
 
           };
 
         })
 
-        // เรียงคะแนน
+        // =========================
+        // เรียงร้านตามคะแนน
+        // =========================
 
         .sort((a,b) =>
 
@@ -743,49 +280,77 @@
 
         );
 
+      console.log(allRestaurants);
+
       createCategoryButtons();
 
       showRestaurants(allRestaurants);
 
     }
 
-    // ======================
-    // สร้างปุ่มประเภทอาหาร
-    // ======================
+    catch(error){
 
-    function createCategoryButtons(){
+      console.log(error);
 
-      const categoryList =
+    }
 
-        document.getElementById(
-          "categoryList"
-        );
+  }
 
-      const categorySet =
-        new Set();
+  // =========================
+  // ปุ่มประเภทอาหาร
+  // =========================
 
-      allRestaurants.forEach(shop => {
+  function createCategoryButtons(){
 
-        const words =
+    const categoryList =
 
-          shop.category
-          .split(/[ ,/&]+/);
+      document.getElementById(
+        "categoryList"
+      );
 
-        words.forEach(word => {
+    const categorySet =
+      new Set();
 
-          if(word.trim()){
+    allRestaurants.forEach(shop => {
 
-            categorySet.add(
-              word.trim()
-            );
+      const words =
 
-          }
+        shop.category
+        .split(/[ ,/&]+/);
 
-        });
+      words.forEach(word => {
+
+        if(word.trim()){
+
+          categorySet.add(
+            word.trim()
+          );
+
+        }
 
       });
 
-      let html = "";
+    });
+
+    let html = "";
+
+    html += `
+
+      <button
+        class="category-btn"
+
+        onclick="
+          filterRestaurants('ทั้งหมด')
+        "
+      >
+
+        ทั้งหมด
+
+      </button>
+
+    `;
+
+    categorySet.forEach(category => {
 
       html += `
 
@@ -793,277 +358,282 @@
           class="category-btn"
 
           onclick="
-            filterRestaurants('ทั้งหมด')
+            filterRestaurants(
+              '${category}'
+            )
           "
         >
 
-          ทั้งหมด
+          ${category}
 
         </button>
 
       `;
 
-      categorySet.forEach(category => {
+    });
 
-        html += `
+    categoryList.innerHTML =
+      html;
 
-          <button
-            class="category-btn"
+  }
 
-            onclick="
-              filterRestaurants(
-                '${category}'
-              )
+  // =========================
+  // Filter
+  // =========================
+
+  function filterRestaurants(category){
+
+    if(category === "ทั้งหมด"){
+
+      showRestaurants(
+        allRestaurants
+      );
+
+      return;
+
+    }
+
+    const filtered =
+
+      allRestaurants.filter(shop =>
+
+        shop.category
+          .includes(category)
+
+      );
+
+    showRestaurants(filtered);
+
+  }
+
+  // =========================
+  // แสดงร้าน
+  // =========================
+
+  function showRestaurants(restaurants){
+
+    currentRestaurants =
+      restaurants;
+
+    const cards =
+
+      document.getElementById(
+        "cards"
+      );
+
+    let html = "";
+
+    if(restaurants.length === 0){
+
+      html = `
+
+        <div class="empty">
+
+          ไม่พบร้านอาหารประเภทนี้
+
+        </div>
+
+      `;
+
+      cards.innerHTML = html;
+
+      return;
+
+    }
+
+    restaurants.forEach((shop,index) => {
+
+      html += `
+
+        <div
+          class="card"
+
+          onclick="openModal(${index})"
+        >
+
+          <img
+            class="card-image"
+
+            src="
+              images/${shop.image}
             "
           >
 
-            ${category}
+          <div class="card-content">
 
-          </button>
+            <div class="top-rank">
 
-        `;
+              TOP ${index + 1}
 
-      });
+            </div>
 
-      categoryList.innerHTML =
-        html;
+            <div class="restaurant-name">
 
-    }
+              ${shop.name}
 
-    // ======================
-    // Filter ร้านอาหาร
-    // ======================
+            </div>
 
-    function filterRestaurants(category){
+            <div class="score">
 
-      if(category === "ทั้งหมด"){
+              ⭐ ${shop.avg.toFixed(1)}/5
 
-        showRestaurants(
-          allRestaurants
-        );
+            </div>
 
-        return;
+            <div class="info">
 
-      }
+              🍜 ประเภทอาหาร:
+              ${shop.category}
 
-      const filtered =
+            </div>
 
-        allRestaurants.filter(shop =>
+            <div class="info">
 
-          shop.category
-            .includes(category)
+              🔥 จุดเด่น:
+              ${shop.highlight}
 
-        );
+            </div>
 
-      showRestaurants(filtered);
+            <div class="info">
 
-    }
-
-    // ======================
-    // แสดงร้านอาหาร
-    // ======================
-
-    function showRestaurants(restaurants){
-
-      const cards =
-
-        document.getElementById(
-          "cards"
-        );
-
-      let html = "";
-
-      if(restaurants.length === 0){
-
-        html = `
-
-          <div class="empty">
-
-            ไม่พบร้านอาหารประเภทนี้
-
-          </div>
-
-        `;
-
-        cards.innerHTML = html;
-
-        return;
-
-      }
-
-      restaurants.forEach((shop,index) => {
-
-        html += `
-
-          <div
-            class="card"
-
-            onclick='openModal(
-              ${JSON.stringify(shop)}
-            )'
-          >
-
-            <img
-              class="card-image"
-
-              src="
-                images/${shop.image}
-              "
-            >
-
-            <div class="card-content">
-
-              <div class="top-rank">
-
-                TOP ${index + 1}
-
-              </div>
-
-              <div class="restaurant-name">
-
-                ${shop.name}
-
-              </div>
-
-              <div class="score">
-
-                ⭐ ${shop.avg}/5
-
-              </div>
-
-              <div class="info">
-
-                🍜 ประเภทอาหาร:
-                ${shop.category}
-
-              </div>
-
-              <div class="info">
-
-                🔥 จุดเด่น:
-                ${shop.highlight}
-
-              </div>
-
-              <div class="info">
-
-                👥 จำนวนผู้รีวิว:
-                ${shop.people} คน
-
-              </div>
+              👥 จำนวนผู้รีวิว:
+              ${shop.people} คน
 
             </div>
 
           </div>
 
-        `;
+        </div>
 
-      });
+      `;
 
-      cards.innerHTML = html;
+    });
 
-    }
+    cards.innerHTML = html;
 
-    // ======================
-    // เปิด Popup
-    // ======================
+  }
 
-    function openModal(shop){
+  // =========================
+  // เปิด Popup
+  // =========================
+
+  function openModal(index){
+
+    const shop =
+      currentRestaurants[index];
+
+    document.getElementById(
+      "modal"
+    ).style.display = "block";
+
+    document.getElementById(
+      "modalImage"
+    ).src =
+      `images/${shop.image}`;
+
+    document.getElementById(
+      "modalTitle"
+    ).innerText =
+      shop.name;
+
+    document.getElementById(
+      "modalScore"
+    ).innerText =
+      `⭐ คะแนน ${shop.avg.toFixed(1)}/5`;
+
+    document.getElementById(
+      "modalCategory"
+    ).innerText =
+      `🍜 ประเภทอาหาร: ${shop.category}`;
+
+    document.getElementById(
+      "modalHighlight"
+    ).innerText =
+      `🔥 จุดเด่น: ${shop.highlight}`;
+
+    document.getElementById(
+      "modalPeople"
+    ).innerText =
+      `👥 จำนวนผู้รีวิว: ${shop.people} คน`;
+
+    let menuHTML = "";
+
+    // =========================
+    // แสดงเมนูเรียงคะแนน
+    // =========================
+
+    shop.menus.forEach((menu,index) => {
+
+      menuHTML += `
+
+        <div class="modal-menu-item">
+
+          <b>
+
+            #${index + 1}
+            ${menu.name}
+
+          </b>
+
+          <br><br>
+
+          ⭐ คะแนน:
+          ${menu.avg.toFixed(1)}/5
+
+          <br>
+
+          👥 รีวิว:
+          ${menu.people} คน
+
+        </div>
+
+      `;
+
+    });
+
+    document.getElementById(
+      "modalMenus"
+    ).innerHTML =
+      menuHTML;
+
+  }
+
+  // =========================
+  // ปิด Popup
+  // =========================
+
+  function closeModal(){
+
+    document.getElementById(
+      "modal"
+    ).style.display = "none";
+
+  }
+
+  // =========================
+  // กดพื้นหลังปิด
+  // =========================
+
+  window.onclick = function(event){
+
+    const modal =
 
       document.getElementById(
         "modal"
-      ).style.display = "block";
+      );
 
-      document.getElementById(
-        "modalImage"
-      ).src =
-        `images/${shop.image}`;
+    if(event.target == modal){
 
-      document.getElementById(
-        "modalTitle"
-      ).innerText =
-        shop.name;
-
-      document.getElementById(
-        "modalScore"
-      ).innerText =
-        `⭐ คะแนน ${shop.avg}/5`;
-
-      document.getElementById(
-        "modalCategory"
-      ).innerText =
-        `🍜 ประเภทอาหาร: ${shop.category}`;
-
-      document.getElementById(
-        "modalHighlight"
-      ).innerText =
-        `🔥 จุดเด่น: ${shop.highlight}`;
-
-      document.getElementById(
-        "modalPeople"
-      ).innerText =
-        `👥 จำนวนผู้รีวิว: ${shop.people} คน`;
-
-      let menuHTML = "";
-
-      shop.menus.forEach(menu => {
-
-        menuHTML += `
-
-          <div class="modal-menu-item">
-
-            🍴 ${menu}
-
-          </div>
-
-        `;
-
-      });
-
-      document.getElementById(
-        "modalMenus"
-      ).innerHTML =
-        menuHTML;
+      modal.style.display =
+        "none";
 
     }
 
-    // ======================
-    // ปิด Popup
-    // ======================
+  }
 
-    function closeModal(){
+  // =========================
+  // เริ่มโหลด
+  // =========================
 
-      document.getElementById(
-        "modal"
-      ).style.display = "none";
+  loadData();
 
-    }
-
-    // ======================
-    // กดพื้นหลังปิด Popup
-    // ======================
-
-    window.onclick = function(event){
-
-      const modal =
-
-        document.getElementById(
-          "modal"
-        );
-
-      if(event.target == modal){
-
-        modal.style.display =
-          "none";
-
-      }
-
-    }
-
-    loadData();
-
-  </script>
-
-</body>
-
-</html> 
+</script>
