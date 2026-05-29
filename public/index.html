@@ -1,460 +1,926 @@
-<script>
+```html
+<!DOCTYPE html>
+<html lang="th">
 
-  let allRestaurants = [];
+<head>
 
-  // =========================
-  // LOAD DATA
-  // =========================
+  <meta charset="UTF-8">
 
-  async function loadData(){
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-    try{
+  <title>
+    SUTCANTEEN
+  </title>
 
-      console.log("Loading data...");
+  <style>
 
-      const response =
-        await fetch("/data");
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
 
-      const result =
-        await response.json();
+    body{
+      background:#000;
+      color:white;
+      font-family:Arial;
+    }
 
-      console.log(result);
+    .navbar{
 
-      const rows =
-        result.data || [];
+      background:#000;
+      padding:20px 40px;
 
-      const restaurants = {};
+      font-size:34px;
+      font-weight:bold;
 
-      // =========================
-      // LOOP DATA
-      // =========================
+      color:#ff5e00;
 
-      rows.forEach(row => {
+      position:sticky;
+      top:0;
 
-        const name =
-          row[1]?.trim();
+      z-index:1000;
 
-        const menu =
-          row[2]?.trim();
+      box-shadow:
+      0 2px 10px rgba(0,0,0,0.5);
 
-        const score =
-          parseFloat(row[3]) || 0;
+    }
 
-        const highlight =
-          row[4] || "ไม่มีข้อมูล";
+    .banner{
 
-        const category =
-          row[5] || "ไม่ระบุ";
+      height:350px;
 
-        if(!name) return;
+      background:
+
+      linear-gradient(
+        to right,
+        rgba(0,0,0,0.9),
+        rgba(255,94,0,0.5)
+      ),
+
+      url("images/banner.jpg");
+
+      background-size:cover;
+      background-position:center;
+
+      display:flex;
+      align-items:center;
+
+      padding:60px;
+
+    }
+
+    .banner-text{
+
+      max-width:700px;
+
+    }
+
+    .banner-text h1{
+
+      font-size:60px;
+      margin-bottom:20px;
+
+    }
+
+    .banner-text p{
+
+      color:#ddd;
+      font-size:20px;
+
+      line-height:1.8;
+
+    }
+
+    .container{
+
+      padding:40px;
+
+    }
+
+    .section-title{
+
+      font-size:34px;
+      margin-bottom:30px;
+
+      font-weight:bold;
+
+    }
+
+    .category-list{
+
+      display:flex;
+      flex-wrap:wrap;
+
+      gap:15px;
+
+      margin-bottom:50px;
+
+    }
+
+    .category-btn{
+
+      background:#222;
+      color:white;
+
+      border:none;
+
+      padding:14px 22px;
+
+      border-radius:12px;
+
+      cursor:pointer;
+
+      transition:0.3s;
+
+      font-size:16px;
+
+    }
+
+    .category-btn:hover{
+
+      background:#ff5e00;
+
+      transform:scale(1.05);
+
+    }
+
+    .cards{
+
+      display:flex;
+      flex-wrap:wrap;
+
+      gap:25px;
+
+    }
+
+    .card{
+
+      width:330px;
+
+      background:#181818;
+
+      border-radius:20px;
+
+      overflow:hidden;
+
+      transition:0.3s;
+
+      box-shadow:
+      0 0 20px rgba(0,0,0,0.4);
+
+    }
+
+    .card:hover{
+
+      transform:scale(1.03);
+
+      background:#252525;
+
+    }
+
+    .card-image{
+
+      width:100%;
+      height:230px;
+
+      object-fit:cover;
+
+    }
+
+    .card-content{
+
+      padding:22px;
+
+    }
+
+    .top-rank{
+
+      display:inline-block;
+
+      background:#ff5e00;
+
+      padding:6px 14px;
+
+      border-radius:8px;
+
+      font-size:14px;
+
+      font-weight:bold;
+
+      margin-bottom:20px;
+
+    }
+
+    .restaurant-name{
+
+      font-size:28px;
+      font-weight:bold;
+
+      margin-bottom:18px;
+
+      line-height:1.4;
+
+    }
+
+    .score{
+
+      color:gold;
+
+      font-size:28px;
+
+      font-weight:bold;
+
+      margin-bottom:18px;
+
+    }
+
+    .info{
+
+      color:#ddd;
+
+      margin-bottom:12px;
+
+      line-height:1.7;
+
+      font-size:16px;
+
+    }
+
+    .menu-section{
+
+      margin-top:20px;
+
+    }
+
+    .menu-title{
+
+      color:#ffb347;
+
+      font-size:18px;
+
+      margin-bottom:14px;
+
+      font-weight:bold;
+
+    }
+
+    .menu-item{
+
+      background:#2b2b2b;
+
+      padding:12px 14px;
+
+      border-radius:10px;
+
+      margin-bottom:12px;
+
+      line-height:1.7;
+
+      font-size:15px;
+
+    }
+
+    .empty{
+
+      color:#999;
+      font-size:22px;
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+
+  <div class="navbar">
+
+    SUTCANTEEN 🍜
+
+  </div>
+
+  <!-- BANNER -->
+
+  <div class="banner">
+
+    <div class="banner-text">
+
+      <h1>
+
+        ระบบแนะนำร้านอาหาร
+
+      </h1>
+
+      <p>
+
+        วิเคราะห์ข้อมูลจาก Google Forms
+        พร้อมจัดอันดับร้านอาหาร
+        และเมนูยอดนิยมจากผู้ใช้งานจริง
+
+      </p>
+
+    </div>
+
+  </div>
+
+  <!-- CONTENT -->
+
+  <div class="container">
+
+    <!-- CATEGORY -->
+
+    <div class="section-title">
+
+      🍽️ เลือกประเภทอาหาร
+
+    </div>
+
+    <div
+      class="category-list"
+      id="categoryList"
+    ></div>
+
+    <!-- RESTAURANT -->
+
+    <div class="section-title">
+
+      🔥 ร้านอาหารแนะนำ
+
+    </div>
+
+    <div
+      class="cards"
+      id="cards"
+    ></div>
+
+  </div>
+
+  <!-- SCRIPT -->
+
+  <script>
+
+    let allRestaurants = [];
+
+    // =========================
+    // LOAD DATA
+    // =========================
+
+    async function loadData(){
+
+      try{
+
+        console.log("Loading data...");
+
+        const response =
+          await fetch("/data");
+
+        const result =
+          await response.json();
+
+        console.log(result);
+
+        const rows =
+          result.data || [];
+
+        const restaurants = {};
 
         // =========================
-        // IMAGE
+        // LOOP DATA
         // =========================
 
-        let image =
-          "default.jpg";
+        rows.forEach(row => {
 
-        if(name.includes("ข้าวมันไก่ตระกูลอ๋อง")){
-          image = "13.jpg";
-        }
+          const name =
+            row[1]?.trim();
 
-        else if(name.includes("เครื่องดื่ม & กาแฟ & ขนม")){
-          image = "1.jpg";
-        }
+          const menu =
+            row[2]?.trim();
 
-        else if(name.includes("ก๋วยเตี๋ยวหมู เย็นตาโฟ")){
-          image = "2.jpg";
-        }
+          const score =
+            parseFloat(row[3]) || 0;
 
-        else if(name.includes("ข้าวราดแกง เบอร์ 3")){
-          image = "3.jpg";
-        }
+          const highlight =
+            row[4] || "ไม่มีข้อมูล";
 
-        else if(name.includes("อาหารตามสั่ง เบอร์ 4")){
-          image = "4.jpg";
-        }
+          const category =
+            row[5] || "ไม่ระบุ";
 
-        else if(name.includes("ฐ.ข้าวมันไก่")){
-          image = "5.jpg";
-        }
+          if(!name) return;
 
-        else if(name.includes("อาหารอีสาน ขนมจีน")){
-          image = "6.jpg";
-        }
+          // =========================
+          // IMAGE
+          // =========================
 
-        else if(name.includes("ข้าวราดแกง (มุสลิม)")){
-          image = "7.jpg";
-        }
+          let image =
+            "default.jpg";
 
-        else if(name.includes("ข้าวราดแกง เบอร์ 8")){
-          image = "8.jpg";
-        }
+          if(name.includes("ข้าวมันไก่ตระกูลอ๋อง")){
+            image = "13.jpg";
+          }
 
-        else if(name.includes("เจ้น้อง ก๋วยเตี๋ยวเนื้อ / ไก่ตุ๋น")){
-          image = "9.jpg";
-        }
+          else if(name.includes("เครื่องดื่ม & กาแฟ & ขนม")){
+            image = "1.jpg";
+          }
 
-        else if(name.includes("อาหารตามสั่ง เบอร์ 10")){
-          image = "10.jpg";
-        }
+          else if(name.includes("ก๋วยเตี๋ยวหมู เย็นตาโฟ")){
+            image = "2.jpg";
+          }
 
-        else if(name.includes("เครื่องดื่ม & ขนมหวาน & ผลไม้")){
-          image = "11.jpg";
-        }
+          else if(name.includes("ข้าวราดแกง เบอร์ 3")){
+            image = "3.jpg";
+          }
 
-        else if(name.includes("ร้านข้างหน้าร้านน้ำ เบอร์ 11")){
-          image = "12.jpg";
-        }
+          else if(name.includes("อาหารตามสั่ง เบอร์ 4")){
+            image = "4.jpg";
+          }
 
-        // =========================
-        // CREATE RESTAURANT
-        // =========================
+          else if(name.includes("ฐ.ข้าวมันไก่")){
+            image = "5.jpg";
+          }
 
-        if(!restaurants[name]){
+          else if(name.includes("อาหารอีสาน ขนมจีน")){
+            image = "6.jpg";
+          }
 
-          restaurants[name] = {
+          else if(name.includes("ข้าวราดแกง (มุสลิม)")){
+            image = "7.jpg";
+          }
 
-            totalScore:0,
-            totalPeople:0,
+          else if(name.includes("ข้าวราดแกง เบอร์ 8")){
+            image = "8.jpg";
+          }
 
-            highlight:"",
-            category:"",
-            image:"",
+          else if(name.includes("เจ้น้อง ก๋วยเตี๋ยวเนื้อ / ไก่ตุ๋น")){
+            image = "9.jpg";
+          }
 
-            menus:{}
+          else if(name.includes("อาหารตามสั่ง เบอร์ 10")){
+            image = "10.jpg";
+          }
 
-          };
+          else if(name.includes("เครื่องดื่ม & ขนมหวาน & ผลไม้")){
+            image = "11.jpg";
+          }
 
-        }
+          else if(name.includes("ร้านข้างหน้าร้านน้ำ เบอร์ 11")){
+            image = "12.jpg";
+          }
 
-        // =========================
-        // RESTAURANT SCORE
-        // =========================
+          // =========================
+          // CREATE SHOP
+          // =========================
 
-        restaurants[name]
-          .totalScore += score;
+          if(!restaurants[name]){
 
-        restaurants[name]
-          .totalPeople += 1;
-
-        restaurants[name]
-          .highlight = highlight;
-
-        restaurants[name]
-          .category = category;
-
-        restaurants[name]
-          .image = image;
-
-        // =========================
-        // MENU SCORE
-        // =========================
-
-        if(menu){
-
-          if(
-            !restaurants[name]
-              .menus[menu]
-          ){
-
-            restaurants[name]
-              .menus[menu] = {
+            restaurants[name] = {
 
               totalScore:0,
-              people:0
+              totalPeople:0,
+
+              highlight:"",
+              category:"",
+              image:"",
+
+              menus:{}
 
             };
 
           }
 
+          // =========================
+          // SCORE
+          // =========================
+
           restaurants[name]
-            .menus[menu]
             .totalScore += score;
 
           restaurants[name]
-            .menus[menu]
-            .people += 1;
+            .totalPeople += 1;
 
-        }
+          restaurants[name]
+            .highlight = highlight;
 
-      });
+          restaurants[name]
+            .category = category;
 
-      // =========================
-      // CONVERT DATA
-      // =========================
-
-      allRestaurants =
-
-        Object.entries(restaurants)
-
-        .map(([name,data]) => {
-
-          const avgScore =
-
-            data.totalPeople > 0
-
-            ? (
-                data.totalScore
-                /
-                data.totalPeople
-              )
-
-            : 0;
+          restaurants[name]
+            .image = image;
 
           // =========================
-          // SORT MENU
+          // MENU SCORE
           // =========================
 
-          const sortedMenus =
+          if(menu){
 
-            Object.entries(data.menus)
+            if(
+              !restaurants[name]
+                .menus[menu]
+            ){
 
-            .map(([menuName,menuData]) => {
+              restaurants[name]
+                .menus[menu] = {
 
-              const menuAvg =
-
-                menuData.people > 0
-
-                ? (
-                    menuData.totalScore
-                    /
-                    menuData.people
-                  )
-
-                : 0;
-
-              return {
-
-                name:menuName,
-
-                avg:menuAvg,
-
-                people:menuData.people
+                totalScore:0,
+                people:0
 
               };
 
-            })
+            }
 
-            .sort((a,b) => {
+            restaurants[name]
+              .menus[menu]
+              .totalScore += score;
 
-              if(b.avg !== a.avg){
-
-                return b.avg - a.avg;
-
-              }
-
-              if(b.people !== a.people){
-
-                return b.people - a.people;
-
-              }
-
-              return a.name.localeCompare(
-                b.name,
-                "th"
-              );
-
-            });
-
-          return {
-
-            name:name,
-
-            avg:avgScore,
-
-            people:data.totalPeople,
-
-            highlight:data.highlight,
-
-            category:data.category,
-
-            image:data.image,
-
-            menus:sortedMenus
-
-          };
-
-        })
-
-        // =========================
-        // SORT RESTAURANT
-        // =========================
-
-        .sort((a,b) => {
-
-          if(b.avg !== a.avg){
-
-            return b.avg - a.avg;
+            restaurants[name]
+              .menus[menu]
+              .people += 1;
 
           }
 
-          return b.people - a.people;
+        });
+
+        // =========================
+        // CONVERT DATA
+        // =========================
+
+        allRestaurants =
+
+          Object.entries(restaurants)
+
+          .map(([name,data]) => {
+
+            const avgScore =
+
+              data.totalPeople > 0
+
+              ? (
+                  data.totalScore
+                  /
+                  data.totalPeople
+                )
+
+              : 0;
+
+            // =========================
+            // SORT MENU
+            // =========================
+
+            const sortedMenus =
+
+              Object.entries(data.menus)
+
+              .map(([menuName,menuData]) => {
+
+                const menuAvg =
+
+                  menuData.people > 0
+
+                  ? (
+                      menuData.totalScore
+                      /
+                      menuData.people
+                    )
+
+                  : 0;
+
+                return {
+
+                  name:menuName,
+
+                  avg:menuAvg,
+
+                  people:menuData.people
+
+                };
+
+              })
+
+              .sort((a,b) => {
+
+                if(b.avg !== a.avg){
+
+                  return b.avg - a.avg;
+
+                }
+
+                if(b.people !== a.people){
+
+                  return b.people - a.people;
+
+                }
+
+                return a.name.localeCompare(
+                  b.name,
+                  "th"
+                );
+
+              });
+
+            return {
+
+              name:name,
+
+              avg:avgScore,
+
+              people:data.totalPeople,
+
+              highlight:data.highlight,
+
+              category:data.category,
+
+              image:data.image,
+
+              menus:sortedMenus
+
+            };
+
+          })
+
+          // =========================
+          // SORT RESTAURANT
+          // =========================
+
+          .sort((a,b) => {
+
+            if(b.avg !== a.avg){
+
+              return b.avg - a.avg;
+
+            }
+
+            return b.people - a.people;
+
+          });
+
+        console.log(allRestaurants);
+
+        createCategoryButtons();
+
+        showRestaurants(allRestaurants);
+
+      }
+
+      catch(error){
+
+        console.error(error);
+
+      }
+
+    }
+
+    // =========================
+    // CATEGORY BUTTONS
+    // =========================
+
+    function createCategoryButtons(){
+
+      const categoryList =
+        document.getElementById(
+          "categoryList"
+        );
+
+      if(!categoryList){
+
+        console.log(
+          "categoryList not found"
+        );
+
+        return;
+
+      }
+
+      const categorySet =
+        new Set();
+
+      allRestaurants.forEach(shop => {
+
+        const words =
+
+          shop.category
+          .split(/[ ,/&]+/);
+
+        words.forEach(word => {
+
+          if(word.trim()){
+
+            categorySet.add(
+              word.trim()
+            );
+
+          }
 
         });
 
-      console.log(allRestaurants);
-
-      createCategoryButtons();
-
-      showRestaurants(allRestaurants);
-
-    }
-
-    catch(error){
-
-      console.error(error);
-
-    }
-
-  }
-
-  // =========================
-  // CATEGORY BUTTONS
-  // =========================
-
-  function createCategoryButtons(){
-
-    const categoryList =
-      document.getElementById(
-        "categoryList"
-      );
-
-    if(!categoryList) return;
-
-    const categorySet =
-      new Set();
-
-    allRestaurants.forEach(shop => {
-
-      const words =
-
-        shop.category
-        .split(/[ ,/&]+/);
-
-      words.forEach(word => {
-
-        if(word.trim()){
-
-          categorySet.add(
-            word.trim()
-          );
-
-        }
-
       });
 
-    });
-
-    let html = "";
-
-    html += `
-
-      <button
-        class="category-btn"
-        onclick="
-          filterRestaurants('ทั้งหมด')
-        "
-      >
-
-        ทั้งหมด
-
-      </button>
-
-    `;
-
-    categorySet.forEach(category => {
+      let html = "";
 
       html += `
 
         <button
           class="category-btn"
           onclick="
-            filterRestaurants(
-              '${category}'
-            )
+            filterRestaurants('ทั้งหมด')
           "
         >
 
-          ${category}
+          ทั้งหมด
 
         </button>
 
       `;
 
-    });
+      categorySet.forEach(category => {
 
-    categoryList.innerHTML =
-      html;
+        html += `
 
-  }
+          <button
+            class="category-btn"
 
-  // =========================
-  // FILTER
-  // =========================
+            onclick="
+              filterRestaurants(
+                '${category}'
+              )
+            "
+          >
 
-  function filterRestaurants(category){
+            ${category}
 
-    if(category === "ทั้งหมด"){
+          </button>
 
-      showRestaurants(
-        allRestaurants
-      );
+        `;
 
-      return;
+      });
+
+      categoryList.innerHTML =
+        html;
 
     }
 
-    const filtered =
+    // =========================
+    // FILTER
+    // =========================
 
-      allRestaurants.filter(shop =>
+    function filterRestaurants(category){
 
-        shop.category.includes(
-          category
-        )
+      if(category === "ทั้งหมด"){
 
-      );
+        showRestaurants(
+          allRestaurants
+        );
 
-    showRestaurants(filtered);
+        return;
 
-  }
+      }
 
-  // =========================
-  // SHOW RESTAURANTS
-  // =========================
+      const filtered =
 
-  function showRestaurants(restaurants){
+        allRestaurants.filter(shop =>
 
-    const cards =
-      document.getElementById(
-        "cards"
-      );
+          shop.category.includes(
+            category
+          )
 
-    if(!cards) return;
+        );
 
-    let html = "";
+      showRestaurants(filtered);
 
-    restaurants.forEach((shop,index) => {
+    }
 
-      let menuHTML = "";
+    // =========================
+    // SHOW RESTAURANTS
+    // =========================
 
-      // ตรงนี้แก้สำคัญที่สุด
+    function showRestaurants(restaurants){
 
-      shop.menus.forEach(menu => {
+      const cards =
+        document.getElementById(
+          "cards"
+        );
 
-        menuHTML += `
+      if(!cards){
 
-          <div class="menu-item">
+        console.log(
+          "cards not found"
+        );
 
-            🍴 ${menu.name}
+        return;
 
-            <br><br>
+      }
 
-            ⭐ ${menu.avg.toFixed(1)}/5
+      let html = "";
 
-            <br>
+      if(restaurants.length === 0){
 
-            👥 ${menu.people} รีวิว
+        cards.innerHTML = `
+
+          <div class="empty">
+
+            ไม่พบร้านอาหาร
+
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+      restaurants.forEach((shop,index) => {
+
+        let menuHTML = "";
+
+        shop.menus.forEach(menu => {
+
+          menuHTML += `
+
+            <div class="menu-item">
+
+              🍴 ${menu.name}
+
+              <br><br>
+
+              ⭐ ${menu.avg.toFixed(1)}/5
+
+              <br>
+
+              👥 ${menu.people} รีวิว
+
+            </div>
+
+          `;
+
+        });
+
+        html += `
+
+          <div class="card">
+
+            <img
+              class="card-image"
+              src="images/${shop.image}"
+            >
+
+            <div class="card-content">
+
+              <div class="top-rank">
+
+                TOP ${index + 1}
+
+              </div>
+
+              <div class="restaurant-name">
+
+                ${shop.name}
+
+              </div>
+
+              <div class="score">
+
+                ⭐ ${shop.avg.toFixed(1)}/5
+
+              </div>
+
+              <div class="info">
+
+                🍜 ประเภทอาหาร:
+                ${shop.category}
+
+              </div>
+
+              <div class="info">
+
+                🔥 จุดเด่น:
+                ${shop.highlight}
+
+              </div>
+
+              <div class="info">
+
+                👥 จำนวนผู้รีวิว:
+                ${shop.people} คน
+
+              </div>
+
+              <div class="menu-section">
+
+                <div class="menu-title">
+
+                  🍽️ เมนูแนะนำ
+
+                </div>
+
+                ${menuHTML}
+
+              </div>
+
+            </div>
 
           </div>
 
@@ -462,84 +928,28 @@
 
       });
 
-      html += `
+      cards.innerHTML = html;
 
-        <div class="card">
+    }
 
-          <img
-            class="card-image"
-            src="images/${shop.image}"
-          >
+    // =========================
+    // START
+    // =========================
 
-          <div class="card-content">
+    document.addEventListener(
 
-            <div class="top-rank">
+      "DOMContentLoaded",
 
-              TOP ${index + 1}
+      function(){
 
-            </div>
+        loadData();
 
-            <div class="restaurant-name">
+      }
 
-              ${shop.name}
+    );
 
-            </div>
+  </script>
 
-            <div class="score">
-
-              ⭐ ${shop.avg.toFixed(1)}/5
-
-            </div>
-
-            <div class="info">
-
-              🍜 ประเภทอาหาร:
-              ${shop.category}
-
-            </div>
-
-            <div class="info">
-
-              🔥 จุดเด่น:
-              ${shop.highlight}
-
-            </div>
-
-            <div class="info">
-
-              👥 จำนวนผู้รีวิว:
-              ${shop.people} คน
-
-            </div>
-
-            <div class="menu-section">
-
-              <div class="menu-title">
-
-                🍽️ เมนูแนะนำ
-
-              </div>
-
-              ${menuHTML}
-
-            </div>
-
-          </div>
-
-        </div>
-
-      `;
-
-    });
-
-    cards.innerHTML = html;
-
-  }
-
-  // =========================
-  // START
-  // =========================
-
-  loadData();
-
-</script>
+</body>
+</html>
+```
